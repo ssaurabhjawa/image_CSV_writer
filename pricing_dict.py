@@ -1,8 +1,8 @@
 productType_dict = {
     "Canvas": 500,
-    "Poster": 250,
-    "Acrylic": 1000,
-    "Wall Paper": 750
+    "Poster": 500,
+    "Acrylic": 500,
+    "Wall Paper": 750,
 }
 
 artist_royalty_dict = {

@@ -1,9 +1,10 @@
 import os
 import uuid
 from dotenv import load_dotenv
-
 from pricing_dict import productType_dict, artist_royalty_dict
 from calculate_price import calculate_price
+from cloudinary_utils import get_image_url_from_cloudinary, upload_image_to_cloudinary
+from extract_file_info import extract_file_info
 
 # Create new Entry widget for product type
 def generate_handle(product_info):
@@ -17,27 +18,42 @@ cloud_name = os.getenv('CLOUDINARY_CLOUD_NAME')
 api_key = os.getenv('CLOUDINARY_API_KEY')
 api_secret = os.getenv('CLOUDINARY_API_SECRET')
 
-def create_image_dict(image_path):
-    # Get image filename and extension
-    image_filename, image_ext = os.path.splitext(os.path.basename(image_path))
+import os
+import json
 
-    # Generate unique public_id for the image on Cloudinary
-    public_id = f"{image_filename}-{uuid.uuid4().hex}"
+def create_img_dictionary(image_filename):
+    # Extract image information from filename
+    file_info = extract_file_info(image_filename)
+    aspect_ratio = file_info["aspect_ratio"]
+    uuid = file_info["uuid"]
+    product_type = file_info["product_type"]
+    title = file_info["title_var"]
+    image_position = file_info["image_position_var"]
+    option1_values = file_info["option1_values"] 
 
-    # Get the Cloudinary image URL for the specified public_id
-    image_src = get_image_url_from_cloudinary(public_id)
+    print(file_info, aspect_ratio, uuid, product_type, title, image_position, option1_values)       
+
+
+
+    # Derive orientation from aspect ratio
+    if float(aspect_ratio) < 1:
+        orientation = "Portrait"
+    elif float(aspect_ratio) > 1:
+        orientation = "Landscape"
+    else:
+        orientation = "Square"
 
     # Create a dictionary for the image with all the CSV fields
     image_dict = {
         "Handle": generate_handle(image_filename),
-        "Title": image_filename,
+        "Title": title,
         "Body (HTML)": "",
         "Vendor": "",
         "Product Category": "",
         "Type": "",
-        "Tags": "",
+        "Tags": "Miscellaneous",
         "Published": "",
-        "Option1 Name": "",
+        "Option1 Name": "Size",
         "Option1 Value": "",
         "Option2 Name": "",
         "Option2 Value": "",
@@ -45,18 +61,8 @@ def create_image_dict(image_path):
         "Option3 Value": "",
         "Variant SKU": "",
         "Variant Grams": "",
-        "Variant Inventory Tracker": "",
-        "Variant Inventory Qty": "",
-        "Variant Inventory Policy": "",
-        "Variant Fulfillment Service": "",
-        "Variant Price": "",
-        "Variant Compare At Price": "",
-        "Variant Requires Shipping": "",
-        "Variant Taxable": "",
-        "Variant Barcode": "",
-        "Image Src": image_src,
-        "Image Position": "",
-        "Image Alt Text": "",
+        "Image Src": image_filename,
+        "Image Alt Text": title,
         "Gift Card": "",
         "SEO Title": "",
         "SEO Description": "",
@@ -83,5 +89,9 @@ def create_image_dict(image_path):
         "Compare At Price / International": "",
         "Status": ""
     }
-    
+
+    # Update the Option1 Value field based on available option values
+    if option1_values:
+        image_dict["Option1 Value"] = option1_values[image_position % len(option1_values)]
+
     return image_dict

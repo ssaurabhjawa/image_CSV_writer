@@ -281,8 +281,6 @@ segregate_button.grid(row=1, column=3, padx=10, pady=10)
 #==================================================================
 #                          Update Image Position
 #==================================================================
-
-
 def update_image_position():
     # Ask user to select a folder
     folder_path = filedialog.askdirectory(title="Select a folder")
@@ -313,7 +311,7 @@ def update_image_position():
             new_filename = f"{aspect_ratio}--{uuid}--{product_type_var.get()}--{title_var.get()}--{image_position}{ext}"
 
             # Rename file
-            os.rename(os.path.join(folder_path, file), os.path.join(folder_path, new_filename))
+            os.rename(os.path.join(folder_path, file), os.path.join(output_folder_path, new_filename))
 
     # Update image_listbox
     image_listbox.delete(0, tk.END)
@@ -328,7 +326,9 @@ def update_image_position():
 update_position_button = tk.Button(root, text="Update Image Position", command=update_image_position)
 update_position_button.grid(row=3, column=3, padx=5, pady=5)
 
-
+#==================================================================
+#                          Update Image Position
+#==================================================================
 
 
 # Run the main event loop
