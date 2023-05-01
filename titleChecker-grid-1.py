@@ -10,10 +10,11 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 import uuid
+import tkinter.simpledialog
+
 
 from pricing_dict import artist_royalty_dict
 from segregate import segregate_images_by_ratio
-from update_image_position import update_image_positions
 
 
 # Initialize tkinter app
@@ -160,7 +161,6 @@ create_output_folder_button.grid(row=6, column=0, padx=10, pady=10)
 #==================================================================
 #                           Name Creation
 #==================================================================
-
 def rename_file():
     # Activate current_selection_listbox
     current_selection_listbox.focus_set()
@@ -177,6 +177,7 @@ def rename_file():
     with Image.open(img_path) as img:
         width, height = img.size
         aspect_ratio = round(width / height, 2)
+        print(aspect_ratio)
 
     # Get file extension
     ext = os.path.splitext(selected_file)[1]
@@ -184,33 +185,34 @@ def rename_file():
     # Create new filename with aspect ratio and UUID
     new_filename = f"{aspect_ratio}--{uuid.uuid4().hex[:6]}--{product_type_var.get()}--{title_var.get()}--{image_position_var.get()}{ext}"
 
-
     try:
-        # Rename file
-        os.rename(os.path.join(image_folder, selected_file), os.path.join(output_folder_path, new_filename))
+        # Check if file exists in the old file path
+        if os.path.isfile(img_path):
+            # Copy file to output folder
+            shutil.copy(img_path, os.path.join(output_folder_path, new_filename))
 
-        # Update current_selection_listbox
-        current_selection_listbox.delete(0, tk.END)
-        current_selection_listbox.insert(0, new_filename)
+            # Update current_selection_listbox
+            current_selection_listbox.delete(0, tk.END)
+            current_selection_listbox.insert(0, new_filename)
 
-        # Clear current_selection_listbox
-        current_selection_listbox.selection_clear(0, tk.END)
+            # Clear current_selection_listbox
+            current_selection_listbox.selection_clear(0, tk.END)
 
-        # Update image_listbox
-        image_listbox.delete(0, tk.END)
-        for file in os.listdir(image_folder):
-            if file.endswith((".jpg", ".jpeg", ".png")):
-                image_listbox.insert(tk.END, file)
+            # Update image_listbox
+            image_listbox.delete(0, tk.END)
+            for file in os.listdir(image_folder):
+                if file.endswith((".jpg", ".jpeg", ".png")):
+                    image_listbox.insert(tk.END, file)
 
-        # Add new filename to renamed_files array
-        renamed_files.append(new_filename)
+            # Add new filename to renamed_files array
+            renamed_files.append(new_filename)
 
-
-        # Update renamed_listbox
-        renamed_listbox.delete(0, END)
-        for file in renamed_files:
-            renamed_listbox.insert(END, file)
-
+            # Update renamed_listbox
+            renamed_listbox.delete(0, END)
+            for file in renamed_files:
+                renamed_listbox.insert(END, file)
+        else:
+            tk.messagebox.showerror("Error", "The selected file no longer exists.")
     except Exception as e:
         tk.messagebox.showerror("Error", f"An error occurred while renaming the file: {e}")
         # Print error message to console for debugging
@@ -281,16 +283,51 @@ segregate_button.grid(row=1, column=3, padx=10, pady=10)
 #==================================================================
 
 
-def update_positions():
-    # Get the path to the folder containing the images
-    folder_path = filedialog.askdirectory()
+def update_image_position():
+    # Ask user to select a folder
+    folder_path = filedialog.askdirectory(title="Select a folder")
 
-    # Update the image positions
-    update_image_positions(folder_path)
+    # Ask user for image position number to rename
+    image_position = tk.simpledialog.askinteger("Image Position", "Enter the image position number to rename:", minvalue=1)
 
-# Create button to update image positions
-update_positions_button = tk.Button(root, text="Update Image Positions", command=update_positions)
-update_positions_button.grid(row=3, column=3)
+    if not folder_path:
+        tk.messagebox.showerror("Error", "Please select a folder.")
+        return
+
+    if not image_position:
+        tk.messagebox.showerror("Error", "Please enter the image position number to rename.")
+        return
+
+    # Iterate through each file in the folder and rename it with updated image position number
+    for file in os.listdir(folder_path):
+        if file.endswith((".jpg", ".jpeg", ".png")):
+            # Get aspect ratio, uuid, product type, and title from the filename
+            filename_parts = file.split("--")
+            aspect_ratio = filename_parts[0]
+            uuid = filename_parts[1]
+            product_type_var.set(filename_parts[2])
+            title_var.set(filename_parts[3])
+
+            # Create new filename with updated image position number
+            ext = os.path.splitext(file)[1]
+            new_filename = f"{aspect_ratio}--{uuid}--{product_type_var.get()}--{title_var.get()}--{image_position}{ext}"
+
+            # Rename file
+            os.rename(os.path.join(folder_path, file), os.path.join(folder_path, new_filename))
+
+    # Update image_listbox
+    image_listbox.delete(0, tk.END)
+    for file in os.listdir(folder_path):
+        if file.endswith((".jpg", ".jpeg", ".png")):
+            image_listbox.insert(tk.END, file)
+    
+    tk.messagebox.showinfo("Success", f"All files in {folder_path} have been renamed with image position {image_position}.")
+
+
+# Create the "Update Image Position" button
+update_position_button = tk.Button(root, text="Update Image Position", command=update_image_position)
+update_position_button.grid(row=3, column=3, padx=5, pady=5)
+
 
 
 

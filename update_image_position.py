@@ -1,37 +1,34 @@
 import os
 import re
 
+def update_image_position():
+    # Ask user for the folder path
+    folder_path = filedialog.askdirectory(title="Select Folder")
 
+    if not folder_path:
+        # User cancelled the operation
+        return
 
-def update_image_positions(folder_path):
-    # Create a dictionary to store the maximum image position for each UUID
-    uuid_positions = {}
+    # Ask user for the new position number
+    new_position = tk.simpledialog.askinteger(title="New Image Position", prompt="Enter the new position number:")
 
-    # Iterate through all the files in the folder
-    for filename in os.listdir(folder_path):
-        # Check if the file is a valid image file
-        if filename.endswith(".jpg") or filename.endswith(".png"):
-            # Extract the UUID and image position from the filename
-            uuid, image_position = re.findall(r"([0-9a-f]{6,})--\d+--(\d+)\.\w+", filename)[0]
+    if not new_position:
+        # User cancelled the operation or entered an invalid value
+        return
 
-            # Update the maximum image position for this UUID
-            if uuid not in uuid_positions:
-                uuid_positions[uuid] = int(image_position)
-            else:
-                uuid_positions[uuid] = max(uuid_positions[uuid], int(image_position))
+    # Rename files in the folder
+    for i, file_name in enumerate(os.listdir(folder_path)):
+        if file_name.endswith((".jpg", ".jpeg", ".png")):
+            # Get the file extension
+            ext = os.path.splitext(file_name)[1]
 
-    # Iterate through all the files in the folder again and update the image position in the filename
-    for filename in os.listdir(folder_path):
-        # Check if the file is a valid image file
-        if filename.endswith(".jpg") or filename.endswith(".png"):
-            # Extract the UUID and image position from the filename
-            uuid, image_position = re.findall(r"([0-9a-f]{6,})--(\d+)--\d+\.\w+", filename)[0]
-
-            # Get the maximum image position for this UUID
-            max_image_position = uuid_positions[uuid]
-
-            # Update the image position in the filename
-            new_filename = re.sub(r"([0-9a-f]{6,})--(\d+)--(\d+)\.\w+", rf"\1--\2--{max_image_position+1}\3", filename)
+            # Create the new file name with the updated position number
+            new_file_name = f"{aspect_ratio}--{uuid.uuid4().hex[:6]}--{product_type_var.get()}--{title_var.get()}--{new_position+i}{ext}"
 
             # Rename the file
-            os.rename(os.path.join(folder_path, filename), os.path.join(folder_path, new_filename))
+            os.rename(os.path.join(folder_path, file_name), os.path.join(folder_path, new_file_name))
+
+    # Show a success message
+    tk.messagebox.showinfo("Success", "Image positions have been updated.")
+
+
