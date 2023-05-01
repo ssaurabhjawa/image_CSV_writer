@@ -12,7 +12,8 @@ import cloudinary.api
 import uuid
 
 from pricing_dict import artist_royalty_dict
-
+from segregate import segregate_images_by_ratio
+from update_image_position import update_image_positions
 
 
 # Initialize tkinter app
@@ -181,7 +182,7 @@ def rename_file():
     ext = os.path.splitext(selected_file)[1]
 
     # Create new filename with aspect ratio and UUID
-    new_filename = f"{product_type_var.get()}--{title_var.get()}--{aspect_ratio}--{image_position_var.get()}--{uuid.uuid4().hex[:6]}{ext}"
+    new_filename = f"{aspect_ratio}--{uuid.uuid4().hex[:6]}--{product_type_var.get()}--{title_var.get()}--{image_position_var.get()}{ext}"
 
 
     try:
@@ -262,8 +263,34 @@ update_output_button = tk.Button(root, text="Update Output Listbox", command=upd
 update_output_button.grid(row=0, column=3, padx=5, pady=5, sticky="s")
 
 
+#==================================================================
+#                           Segregate
+#==================================================================
+def segregate_images():
+    aspect_ratios = {"1.33": [], "1.5": [], "1.6": [], "1.77": [], "1.85": [], "2": [], "2.2": [], "2.39": []}
+    segregate_images_by_ratio("C:/Users/Saurabh/Documents/Python Scripts/Products/Products", aspect_ratios)
 
 
+# Create button to segregate images
+segregate_button = tk.Button(root, text="Segregate Images", command=segregate_images)
+segregate_button.grid(row=1, column=3, padx=10, pady=10)
+
+
+#==================================================================
+#                          Update Image Position
+#==================================================================
+
+
+def update_positions():
+    # Get the path to the folder containing the images
+    folder_path = filedialog.askdirectory()
+
+    # Update the image positions
+    update_image_positions(folder_path)
+
+# Create button to update image positions
+update_positions_button = tk.Button(root, text="Update Image Positions", command=update_positions)
+update_positions_button.grid(row=3, column=3)
 
 
 
