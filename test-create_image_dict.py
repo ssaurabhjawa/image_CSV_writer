@@ -1,4 +1,4 @@
-from create_image_dict import create_image_dict
+from create_dict import create_image_dict
 
 def test_create_image_dict():
     image_path = "C:/Users/Saurabh/Documents/Python Scripts/Products/Products/T-Shirt-Spring flower-02-tshirtab.jpg"

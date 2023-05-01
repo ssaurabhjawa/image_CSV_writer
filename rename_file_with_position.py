@@ -1,3 +1,9 @@
+title_var = tk.StringVar(root)
+# Create variable for image position
+image_position_var = tk.IntVar(value=0)
+
+
+
 def rename_file_with_position():
     # Get selected file from the current selection Listbox
     selected_file = current_selection_listbox.get(current_selection_listbox.curselection())
@@ -47,3 +53,39 @@ def rename_file_with_position():
         tk.messagebox.showerror("Error", f"An error occurred while renaming the file: {e}")
         # Print error message to console for debugging
         print(f"Error occurred while renaming the file: {str(e)}")
+
+
+def find_name():
+    # Get the selected filename from the output listbox
+    selected_filename = output_listbox.get(output_listbox.curselection())
+
+    # Split filename into its components
+    parts = selected_filename.split("--")
+    product_type = parts[0]
+    title = parts[1]
+    aspect_ratio = parts[2]
+
+    # Find existing files with the same product type, title, and aspect ratio in output folder
+    output_files = [f for f in os.listdir(output_folder_path) if f.startswith(f"{product_type}--{title}--{aspect_ratio}")]
+    image_positions = [int(os.path.splitext(f.split("--")[3])[0]) for f in output_files]
+    if len(image_positions) == 0:
+        next_image_position = 1
+    else:
+        next_image_position = max(image_positions) + 1
+
+    # Update the title_entry with the next available image position
+    highest_image_position_entry.delete(0, END)
+    highest_image_position_entry.insert(0, f"{product_type}--{title}--{aspect_ratio}--{next_image_position}")
+
+    # Set the focus on the option_value_entry for easy editing
+    highest_image_position_entry.focus()
+
+
+
+find_name_button = tk.Button(root, text="Use Name", command=find_name)
+find_name_button.grid(row=3, column=3, padx=5, pady=5, sticky="w")
+
+
+# Create new Entry widget for highest image position
+highest_image_position_entry = tk.Entry(root, width=70)
+highest_image_position_entry.grid(row=2, column=3, padx=5, pady=5, sticky="w")

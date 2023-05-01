@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 root = tk.Tk()
 
 from pricing_dict import artist_royalty_dict
