@@ -12,7 +12,7 @@ product_sizes = {
 }
 
 def test_create_img_dictionary():
-    file_name = "1.0--9cc4fa--Canvas--animal Letters9898--1.png"
+    file_name = "1.37--ffa1cd--Canvas--Spring Flower--3--OBL Print.png"
     img_dict = create_img_dictionary(file_name)
     print(img_dict)
 

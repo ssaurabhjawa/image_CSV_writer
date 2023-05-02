@@ -115,7 +115,6 @@ product_type_label = tk.Label(root, text="Product Type:")
 product_type_dropdown = ttk.Combobox(root, textvariable=product_type_var, values=product_type_options)
 product_type_dropdown.config(width=10)
 
-
 product_type_label.grid(row=3, column=1, padx=5, pady=5, sticky="nw")
 product_type_dropdown.grid(row=3, column=1, padx=5, pady=5, sticky="sw")
 
@@ -165,6 +164,7 @@ def rename_file():
     # Activate current_selection_listbox
     current_selection_listbox.focus_set()
 
+
     # Get selected image filename
     selected_file = current_selection_listbox.get(current_selection_listbox.curselection())
 
@@ -183,7 +183,7 @@ def rename_file():
     ext = os.path.splitext(selected_file)[1]
 
     # Create new filename with aspect ratio and UUID
-    new_filename = f"{aspect_ratio}--{uuid.uuid4().hex[:6]}--{product_type_var.get()}--{title_var.get()}--{image_position_var.get()}{ext}"
+    new_filename = f"{aspect_ratio}--{uuid.uuid4().hex[:6]}--{product_type_var.get()}--{title_var.get()}--{image_position_var.get()}--{selected_artist.get()}{ext}"
 
     try:
         # Check if file exists in the old file path
@@ -299,16 +299,21 @@ def update_image_position():
     # Iterate through each file in the folder and rename it with updated image position number
     for file in os.listdir(folder_path):
         if file.endswith((".jpg", ".jpeg", ".png")):
-            # Get aspect ratio, uuid, product type, and title from the filename
-            filename_parts = file.split("--")
+            # Remove extension from filename
+            filename_without_ext = os.path.splitext(file)[0]
+            # Get aspect ratio, uuid, product type, title, and artist from the filename
+            filename_parts = filename_without_ext.split("--")
             aspect_ratio = filename_parts[0]
             uuid = filename_parts[1]
-            product_type_var.set(filename_parts[2])
-            title_var.set(filename_parts[3])
+            product_type = filename_parts[2]
+            title = (filename_parts[3])
+            artist_name = filename_parts[5] # assuming artist name is separated by underscore
 
-            # Create new filename with updated image position number
+            # Create new filename with updated image position number and artist name
             ext = os.path.splitext(file)[1]
-            new_filename = f"{aspect_ratio}--{uuid}--{product_type_var.get()}--{title_var.get()}--{image_position}{ext}"
+            new_filename = f"{aspect_ratio}--{uuid}--{product_type}--{title}--{image_position}--{artist_name}{ext}"
+
+
 
             # Rename file
             os.rename(os.path.join(folder_path, file), os.path.join(output_folder_path, new_filename))
@@ -327,8 +332,57 @@ update_position_button = tk.Button(root, text="Update Image Position", command=u
 update_position_button.grid(row=3, column=3, padx=5, pady=5)
 
 #==================================================================
-#                          Update Image Position
+#                          Process Image
 #==================================================================
+from create_dict import create_img_dictionary
+from merge_dict import merge_images
+
+def process_images():
+    folder_path = output_folder_path # Replace with the path to your folder
+    images = []
+
+    # Iterate through each file in the folder and create an image dictionary for it
+    for file in os.listdir(folder_path):
+        print(file)
+        if file.endswith((".jpg", ".jpeg", ".png")):
+            image_dict = create_img_dictionary(file)
+            images.append(image_dict)
+
+    # Merge the dictionaries for images with the same handle
+    merged_images = merge_images(images)
+
+    # Print the merged images to the console
+    print(merged_images)
+
+# Create a tkinter window and button to process the images
+window = tk.Tk()
+window.title("Process Images")
+
+process_images = tk.Button(root, text="1", command=process_images)
+process_images.grid(row=6, column=6,padx=5, pady=5)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # Run the main event loop

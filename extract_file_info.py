@@ -69,7 +69,8 @@ def extract_file_info(file_name):
     uuid = file_parts[1]
     product_type = file_parts[2]
     title_var = file_parts[3]
-    image_position_var = int(os.path.splitext(file_parts[4])[0])
+    image_position_var = int(file_parts[4])
+    artist_name = os.path.splitext(file_parts[5])[0]
 
     # Derive orientation from aspect ratio
     if aspect_ratio < 1:
@@ -80,9 +81,9 @@ def extract_file_info(file_name):
         orientation = "Square"
 
     # Define the option values based on the product type and orientation
-    if product_type in product_sizes and orientation in product_sizes[product_type]:
+    if product_type.lower() in product_sizes and orientation in product_sizes[product_type.lower()]:
         option1_values = []
-        for dimensions in product_sizes[product_type][orientation]:
+        for dimensions in product_sizes[product_type.lower()][orientation]:
             option1_values.append(dimensions)
     else:
         option1_values = []
@@ -94,6 +95,7 @@ def extract_file_info(file_name):
         "product_type": product_type,
         "title_var": title_var,
         "image_position_var": image_position_var,
+        "vendor": artist_name,
         "option1_values": option1_values
     }
 

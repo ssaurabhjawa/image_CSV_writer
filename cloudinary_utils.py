@@ -17,16 +17,19 @@ cloudinary.config(
     api_secret="<your_api_secret>"
 )
 
-def upload_image_to_cloudinary(filename, new_filename):
-    # Upload the image to Cloudinary
-    response = cloudinary.uploader.upload(filename, public_id=os.path.splitext(new_filename)[0])
+# def upload_image_to_cloudinary(filename, new_filename):
+#     # Upload the image to Cloudinary
+#     response = cloudinary.uploader.upload(filename, public_id=os.path.splitext(new_filename)[0])
 
-    # Return the Cloudinary public ID
-    return response["public_id"]
+#     # Return the Cloudinary public ID
+#     return response["public_id"]
+
+
+def get_image_url_from_cloudinary(public_id):
+    image = cloudinary.CloudinaryImage(public_id)
+    return image.image()
 
 
 def get_image_url_from_cloudinary(public_id):
     resource = cloudinary.api.resource(public_id)
     return resource["url"]
-
-
