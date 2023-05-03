@@ -60,11 +60,14 @@ product_sizes = {
 }
 
 
-def extract_file_info(file_name):
+def extract_file_info(file_path):
+    # Extract file name from file path
+    file_name = os.path.basename(file_path)
     # Split file name into parts based on delimiter
     file_parts = file_name.split("--")
 
     # Extract variables from file parts
+    print(file_parts)
     aspect_ratio = float(file_parts[0])
     uuid = file_parts[1]
     product_type = file_parts[2]

@@ -177,7 +177,7 @@ def rename_file():
     with Image.open(img_path) as img:
         width, height = img.size
         aspect_ratio = round(width / height, 2)
-        print(aspect_ratio)
+        
 
     # Get file extension
     ext = os.path.splitext(selected_file)[1]
@@ -331,52 +331,154 @@ def update_image_position():
 update_position_button = tk.Button(root, text="Update Image Position", command=update_image_position)
 update_position_button.grid(row=3, column=3, padx=5, pady=5)
 
+
+
+
+
+            
+
+
 #==================================================================
-#                          Process Image
+#              Step 1. Upload to Cloudinary & URL
 #==================================================================
+from cloudinary.uploader import upload
+from cloudinary.utils import cloudinary_url
+
+def upload_to_cloudinary(image_path):
+    cloudinary.config(
+    cloud_name = "djqvqmqe2",
+    api_key = "379169473671185",
+    api_secret = "HFgkfTbvvKlD0TGtXmQDLBFBDys",
+    secure = True
+)
+    response = cloudinary.uploader.upload(image_path, folder="product-images/")
+    public_id = response["public_id"]
+    print(f"Uploaded image {public_id} to Cloudinary")
+    return public_id
+            
+def get_image_url_from_cloudinary(public_id):
+    resource = cloudinary.api.resource(public_id)
+    return resource["url"]
+
+
+#==================================================================
+#      Step 2. Process Directory
+#==================================================================
+
 from create_dict import create_img_dictionary
-from merge_dict import merge_images
 
-def process_images():
-    folder_path = output_folder_path # Replace with the path to your folder
-    images = []
+def process_image(file_path):
+    public_id = upload_to_cloudinary(file_path)
+    image_dict = create_img_dictionary(file_path)
+    image_dict['Image Src'] = get_image_url_from_cloudinary(public_id)
+    return image_dict
 
-    # Iterate through each file in the folder and create an image dictionary for it
-    for file in os.listdir(folder_path):
-        print(file)
-        if file.endswith((".jpg", ".jpeg", ".png")):
-            image_dict = create_img_dictionary(file)
-            images.append(image_dict)
+def process_directory():
+    global imagesList
+    image_dicts = []
+    for filename in os.listdir(output_folder_path):
+        if filename.endswith(('.jpg', '.jpeg', '.png')):
+            try:
+                file_path = os.path.join(output_folder_path, filename)
+                image_dict = process_image(file_path)
+                # Add the image_dict to the main list of image dicts
+                image_dicts.append(image_dict)
+            except Exception as e:
+                error_msg = f"Error processing file {filename}: {str(e)}"
+                print(error_msg)
+                messagebox.showerror("Error", error_msg)
+    imagesList = image_dicts
 
+#==================================================================
+#      Step 5. Merge Dictionary
+#==================================================================
+
+# def merge_images(images):
+#     merged_images = {}
+#     for image in images:
+#         handle = image['Handle']
+#         position = image['image_position']
+#         if handle not in merged_images:
+#             merged_images[handle] = {
+#                 'Handle': handle,
+#                 'Image Position': position,
+#                 'Image Src': [image['Image Src']]
+#             }
+#         else:
+#             merged_images[handle]['Image Src'].append(image['Image Src'])
+#     return list(merged_images.values())
+# # Merge the dictionaries for images with the same handle
+
+def merge_image_dicts(images):
+    # Create a dictionary to store the merged images
+    merged_dict = {}
+
+    # Loop through each image dictionary in the list
+    for image in images:
+        handle = image["Handle"]
+
+        # If the handle is not in the merged_dict, create a new entry
+        if handle not in merged_dict:
+            merged_dict[handle] = image.copy()
+            merged_dict[handle]["Image Src"] = [merged_dict[handle]["Image Src"]] # Convert to list
+        # If the handle is already in the merged_dict, append the "Image Src" to the existing list
+        else:
+            merged_dict[handle]["Image Src"].append(image["Image Src"])
+
+    # Return a list of the merged dictionaries
+    return list(merged_dict.values())
+
+import json
+
+def group_images_by_handle(image_dicts):
+    # Merge the image dictionaries based on the "Handle" field
+    merged_images = merge_image_dicts(image_dicts)
+
+    # Group the merged image dictionaries by handle
+    grouped_images = {}
+    for image in merged_images:
+        handle = image["Handle"]
+        if handle not in grouped_images:
+            grouped_images[handle] = [image]
+        else:
+            grouped_images[handle].append(image)
+
+    # Return a dictionary of lists of image dictionaries grouped by handle
+    print(json.dumps(grouped_images, indent=4))
+    return grouped_images
+
+
+
+
+
+def process_and_merge():
+    # Invoke process_directory function to populate imagesList
+    process_directory()
     # Merge the dictionaries for images with the same handle
-    merged_images = merge_images(images)
-
-    # Print the merged images to the console
+    merged_images = group_images_by_handle(imagesList)
+    # Print the merged images to verify the results
     print(merged_images)
 
-# Create a tkinter window and button to process the images
-window = tk.Tk()
-window.title("Process Images")
-
-process_images = tk.Button(root, text="1", command=process_images)
+process_images = tk.Button(root, text="1", width = 10, height=10,command=process_and_merge)
 process_images.grid(row=6, column=6,padx=5, pady=5)
 
+#==================================================================
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+# Step 6. Create CSV
+# Step 7. Upload CSV to Shopify
+# Step 8. Upload Images to Shopify
+# Step 9. Create Product
+# Step 10. Create Variants
+# Step 11. Create Metafields
+# Step 12. Create Custom Collections
+# Step 13. Create Smart Collections
+# Step 14. Create Product Tags
+# Step 15. Create Product Metafields
+# Step 16. Create Product Variants Metafields
+#     
 
 
 
