@@ -12,9 +12,7 @@ def generate_cloudinary_public_id():
 def create_img_dictionary(image_filename):
     # Extract image information from filename
     file_info = extract_file_info(image_filename)
-    print(file_info)
     aspect_ratio = file_info["aspect_ratio"]
-    print(aspect_ratio)
     uuid = file_info["uuid"]
     product_type = file_info["product_type"]
     title = file_info["title_var"]

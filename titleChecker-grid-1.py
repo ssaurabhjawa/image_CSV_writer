@@ -393,22 +393,6 @@ def process_directory():
 #      Step 5. Merge Dictionary
 #==================================================================
 
-# def merge_images(images):
-#     merged_images = {}
-#     for image in images:
-#         handle = image['Handle']
-#         position = image['image_position']
-#         if handle not in merged_images:
-#             merged_images[handle] = {
-#                 'Handle': handle,
-#                 'Image Position': position,
-#                 'Image Src': [image['Image Src']]
-#             }
-#         else:
-#             merged_images[handle]['Image Src'].append(image['Image Src'])
-#     return list(merged_images.values())
-# # Merge the dictionaries for images with the same handle
-
 def merge_image_dicts(images):
     # Create a dictionary to store the merged images
     merged_dict = {}
@@ -466,19 +450,6 @@ process_images.grid(row=6, column=6,padx=5, pady=5)
 
 
 
-
-# Step 6. Create CSV
-# Step 7. Upload CSV to Shopify
-# Step 8. Upload Images to Shopify
-# Step 9. Create Product
-# Step 10. Create Variants
-# Step 11. Create Metafields
-# Step 12. Create Custom Collections
-# Step 13. Create Smart Collections
-# Step 14. Create Product Tags
-# Step 15. Create Product Metafields
-# Step 16. Create Product Variants Metafields
-#     
 
 
 
