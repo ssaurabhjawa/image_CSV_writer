@@ -1,13 +1,18 @@
 import os
 import uuid
 from dotenv import load_dotenv
+from pricing_dict import productType_dict, artist_royalty_dict
+from assets.calculate_price import calculate_price
 from extract_file_info import extract_file_info
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+from extract_file_info import extract_file_info
+from cloudinary.uploader import upload
+from cloudinary.utils import cloudinary_url
 
-# Function to generate a Cloudinary public ID
-def generate_cloudinary_public_id():
-    return str(uuid.uuid4())
 
-def create_img_dictionary(image_filename):
+def variant_level_dictionary(image_filename,n):
     # Extract image information from filename
     file_info = extract_file_info(image_filename)
     aspect_ratio = file_info["aspect_ratio"]
@@ -17,7 +22,7 @@ def create_img_dictionary(image_filename):
     image_position = file_info["image_position_var"]
     artist= file_info["vendor"]
     option1_values = file_info["option1_values"]
-    public_id = generate_cloudinary_public_id,
+    option1_prices = file_info["option1_prices"]
 
     # Create a dictionary for the image with all the CSV fields
     image_dict = {
@@ -35,6 +40,7 @@ def create_img_dictionary(image_filename):
         "Option2 Value": "",
         "Option3 Name": "",
         "Option3 Value": "",
+        "Variant Price":option1_prices[n] if option1_prices else "",
         "Image Src": "",
         "Image Alt Text": title,
         "Gift Card": "FALSE",

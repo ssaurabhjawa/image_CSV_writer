@@ -63,6 +63,13 @@ product_sizes = {
     },
 }
 
+artist_prices = {
+    "Shutterstock": 257,
+    "Artist 1": 1.1,
+    "Artist 2": 1.1,
+    "Artist 3": 1.1
+}
+
 
 def extract_file_info(file_path):
     # Extract file name from file path
@@ -86,12 +93,42 @@ def extract_file_info(file_path):
     else:
         orientation = "Square"
 
+    # Create dictionary containing the extracted variables
+    file_info = {
+        "aspect_ratio": aspect_ratio,
+        "uuid": uuid,
+        "product_type": product_type,
+        "title_var": title_var,
+        "image_position_var": image_position_var,
+        "vendor": artist_name,
+        "option1_name": "Size",
+    }
+
+    # Extract option 1 values and prices if product type is supported
+    if product_type.lower() in ["canvas", "poster", "acrylic", "wallpaper"]:
+        option1_values, option1_prices = extract_option1Value_wallArt(file_info, product_type, orientation)
+        artist_price = artist_prices.get(artist_name, 1)
+        option1_prices = [round(p * artist_price, 2) for p in option1_prices]
+        file_info["option1_values"] = option1_values
+        file_info["option1_prices"] = option1_prices
+    return file_info
+
+def extract_option1Value_wallArt(file_info, product_type, orientation):
+    # Derive orientation from aspect ratio
+    aspect_ratio = file_info['aspect_ratio']
+    if aspect_ratio < 1:
+        orientation = "Portrait"
+    elif aspect_ratio > 1:
+        orientation = "Landscape"
+    else:
+        orientation = "Square"
+
     # Define the option values based on the product type and orientation
-    if product_type.lower() in product_sizes and orientation in product_sizes[product_type.lower()]:
+    if product_type.lower() in ["canvas", "poster", "acrylic", "wallpaper"] and orientation in product_sizes[product_type.lower()]:
         option1_values = []
         option1_prices = []
         for dimensions in product_sizes[product_type.lower()][orientation]:
-            option1_values.append(f"{dimensions['size']}")
+            option1_values.append(dimensions['size'])
             option1_prices.append(dimensions['price'])
     elif product_type.lower() == "canvas" and orientation in product_sizes[product_type.lower()]:
         option1_values = []
@@ -104,45 +141,17 @@ def extract_file_info(file_path):
             aspect_ratio_min = dimensions['ratio'] - aspect_ratio_tolerance
             aspect_ratio_max = dimensions['ratio'] + aspect_ratio_tolerance
             if abs(aspect_ratio - (width_cm / height_cm)) <= aspect_ratio_tolerance:
-                option1_values.append(f"{dimensions['size']}")
+                option1_values.append(dimensions['size'])
                 option1_prices.append(dimensions['price'])
     else:
         option1_values = []
         option1_prices = []
 
-    # Create dictionary containing the extracted variables
-    file_info = {
-        "aspect_ratio": aspect_ratio,
-        "uuid": uuid,
-        "product_type": product_type,
-        "title_var": title_var,
-        "image_position_var": image_position_var,
-        "vendor": artist_name,
-        "option1_name": "Size",
-        "option1_values": option1_values,
-        "option1_prices": option1_prices,
-    }
-
-    return file_info
-
+    return option1_values, option1_prices
 
 def test_extract_file_info():
-    file_path = "1.33--1234--Acrylic--Test--1--Artist.jpg"
-    expected_output = {
-        "aspect_ratio": 1.33,
-        "uuid": "1234",
-        "product_type": "Acrylic",
-        "title_var": "Test",
-        "image_position_var": 1,
-        "vendor": "Artist",
-        "option1_values": [
-            {"size": "120x90cm", "ratio": 1.33, "price": 540},
-            {"size": "140x105cm", "ratio": 1.33, "price": 735},
-            {"size": "72x54cm", "ratio": 1.33, "price": 194.4},
-            {"size": "80x60cm", "ratio": 1.33, "price": 240}
-        ]
-    }
+    file_path = "1.5--d2c9bf--canvas--Sunset--1--Artist 1.jpg"
+    actual_file_info = extract_file_info(file_path)
 
-    print(extract_file_info(file_path))
+    
 
-test_extract_file_info()

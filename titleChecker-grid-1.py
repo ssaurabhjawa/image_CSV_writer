@@ -366,87 +366,35 @@ def get_image_url_from_cloudinary(public_id):
 #==================================================================
 
 from create_dict import create_img_dictionary
+from product_level_dict import product_level_dictionary
+from variant_level_dict import variant_level_dictionary
 
-def process_image(file_path):
-    public_id = upload_to_cloudinary(file_path)
-    image_dict = create_img_dictionary(file_path)
-    image_dict['Image Src'] = get_image_url_from_cloudinary(public_id)
-    return image_dict
-
-def process_directory():
-    global imagesList
-    image_dicts = []
+def process_image():
+    global image_list
+    image_dict = []
     for filename in os.listdir(output_folder_path):
         if filename.endswith(('.jpg', '.jpeg', '.png')):
-            try:
-                file_path = os.path.join(output_folder_path, filename)
-                image_dict = process_image(file_path)
-                # Add the image_dict to the main list of image dicts
-                image_dicts.append(image_dict)
-            except Exception as e:
-                error_msg = f"Error processing file {filename}: {str(e)}"
-                print(error_msg)
-                messagebox.showerror("Error", error_msg)
-    imagesList = image_dicts
-
-#==================================================================
-#      Step 5. Merge Dictionary
-#==================================================================
-
-def merge_image_dicts(images):
-    # Create a dictionary to store the merged images
-    merged_dict = {}
-
-    # Loop through each image dictionary in the list
-    for image in images:
-        handle = image["Handle"]
-
-        # If the handle is not in the merged_dict, create a new entry
-        if handle not in merged_dict:
-            merged_dict[handle] = image.copy()
-            merged_dict[handle]["Image Src"] = [merged_dict[handle]["Image Src"]] # Convert to list
-        # If the handle is already in the merged_dict, append the "Image Src" to the existing list
-        else:
-            merged_dict[handle]["Image Src"].append(image["Image Src"])
-
-    # Return a list of the merged dictionaries
-    return list(merged_dict.values())
-
-import json
-
-def group_images_by_handle(image_dicts):
-    # Merge the image dictionaries based on the "Handle" field
-    merged_images = merge_image_dicts(image_dicts)
-
-    # Group the merged image dictionaries by handle
-    grouped_images = {}
-    for image in merged_images:
-        handle = image["Handle"]
-        if handle not in grouped_images:
-            grouped_images[handle] = [image]
-        else:
-            grouped_images[handle].append(image)
-
-    # Return a dictionary of lists of image dictionaries grouped by handle
-    print(json.dumps(grouped_images, indent=4))
-    return grouped_images
+            file_path = os.path.join(output_folder_path, filename)
+            # Extract image position number from filename
+            file_parts = filename.split("--")
+            position = int(file_parts[4])
+            if position == 1 :
+                print(f"file name::{filename}")
+                image_dict = product_level_dictionary(filename)           
+            elif position > 1:
+                image_dict = variant_level_dictionary(filename, position)
+    print(image_dict)
+    return image_dict
 
 
 
 
 
-def process_and_merge():
-    # Invoke process_directory function to populate imagesList
-    process_directory()
-    # Merge the dictionaries for images with the same handle
-    merged_images = group_images_by_handle(imagesList)
-    # Print the merged images to verify the results
-    print(merged_images)
-
-process_images = tk.Button(root, text="1", width = 10, height=10,command=process_and_merge)
+process_images = tk.Button(root, text="1", width = 10, height=10,command=process_image)
 process_images.grid(row=6, column=6,padx=5, pady=5)
 
-#==================================================================
+
+
 
 
 
