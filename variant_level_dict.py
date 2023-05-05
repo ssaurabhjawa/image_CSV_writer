@@ -11,8 +11,50 @@ from extract_file_info import extract_file_info
 from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
 
+#==================================================================
+#              Step 1. Upload to Cloudinary & URL
+#==================================================================
+from cloudinary.uploader import upload
+from cloudinary.utils import cloudinary_url
 
-def variant_level_dictionary(image_filename,option, price):
+def upload_to_cloudinary(image_path):
+    cloudinary.config(
+    cloud_name = "djqvqmqe2",
+    api_key = "379169473671185",
+    api_secret = "HFgkfTbvvKlD0TGtXmQDLBFBDys",
+    secure = True
+)
+    response = cloudinary.uploader.upload(image_path, folder="product-images/")
+    public_id = response["public_id"]
+    print(f"Uploaded image {public_id} to Cloudinary")
+    return public_id
+            
+def get_image_url_from_cloudinary(public_id):
+    resource = cloudinary.api.resource(public_id)
+    return resource["url"]
+
+
+#==================================================================
+#                    Variant_level_dictionary 
+#==================================================================
+def variant_level_dictionary(image_filename, output_folder_path, option, price,image_filename_dict):
+    print(image_filename)
+       # Check if image filename already exists in dictionary
+    if image_filename in image_filename_dict:
+        print(image_filename)
+        print(True)
+        # Retrieve public ID from dictionary and use it to generate the image URL
+        public_id = image_filename_dict[image_filename]
+        image_url = get_image_url_from_cloudinary(public_id)
+    else:
+        print(False)
+        # Upload image to Cloudinary and get public ID
+        image_path = os.path.join(output_folder_path, image_filename)
+        public_id = upload_to_cloudinary(image_path)
+        image_filename_dict[image_filename] = public_id
+        # Generate the image URL from the public ID
+        image_url = get_image_url_from_cloudinary(public_id)
+    
     # Extract image information from filename
     file_info = extract_file_info(image_filename)
     aspect_ratio = file_info["aspect_ratio"]
@@ -39,7 +81,7 @@ def variant_level_dictionary(image_filename,option, price):
         "Option3 Name": "",
         "Option3 Value": "",
         "Variant Price":price if price else "",
-        "Image Src": "",
+        "Image Src": image_url,  # Use the Shopify URL
         "Image Alt Text": title,
         "Gift Card": "FALSE",
         "SEO Title": "",
@@ -54,7 +96,7 @@ def variant_level_dictionary(image_filename,option, price):
         "Compare At Price / International": "",
         "Status": "active",
         "image_position": image_position,
-         }
-
+    }
+    
     return image_dict
 

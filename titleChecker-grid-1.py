@@ -404,6 +404,7 @@ def write_csv(images_list):
 def process_image():
     image_list = []
     image_dict = []
+    image_filename_dict = {}
     for filename in os.listdir(output_folder_path):
         if filename.endswith(('.jpg', '.jpeg', '.png')):
             file_path = os.path.join(output_folder_path, filename)
@@ -412,7 +413,7 @@ def process_image():
             position = int(file_parts[4])
             if position == 1 :
                 print(f"file name::{filename}")
-                image_dict = product_level_dictionary(filename)  
+                image_dict = product_level_dictionary(filename, output_folder_path)  
                 image_list.append(image_dict)         
             elif position == 2 :
                 file_info = extract_file_info(filename)
@@ -421,7 +422,7 @@ def process_image():
                 print(option1_values)
                 print(option1_prices)
                 for i, option in enumerate(option1_values, start=1):
-                    image_dict = variant_level_dictionary(filename, option1_values[i-1], option1_prices[i-1])
+                    image_dict = variant_level_dictionary(filename, output_folder_path, option1_values[i-1], option1_prices[i-1], image_filename_dict)
                     image_list.append(image_dict)
 
     return image_list

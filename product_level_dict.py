@@ -9,6 +9,34 @@ import requests
 import openai_secret_manager
 import openai
 import re
+import os
+
+
+#==================================================================
+#              Step 1. Upload to Cloudinary & URL
+#==================================================================
+from cloudinary.uploader import upload
+from cloudinary.utils import cloudinary_url
+
+def upload_to_cloudinary(image_path):
+    cloudinary.config(
+    cloud_name = "djqvqmqe2",
+    api_key = "379169473671185",
+    api_secret = "HFgkfTbvvKlD0TGtXmQDLBFBDys",
+    secure = True
+)
+    response = cloudinary.uploader.upload(image_path, folder="product-images/")
+    public_id = response["public_id"]
+    print(f"Uploaded image {public_id} to Cloudinary")
+    return public_id
+            
+def get_image_url_from_cloudinary(public_id):
+    resource = cloudinary.api.resource(public_id)
+    return resource["url"]
+
+#==================================================================
+#              Step 2. generate_description
+#==================================================================
 
 def generate_description(prompt, max_length):
     # Get OpenAI API credentials
@@ -57,7 +85,13 @@ def generate_description(prompt, max_length):
 #     print("Failed to generate text:", response.status_code, response.text)
 
 
-def product_level_dictionary(image_filename):
+#==================================================================
+#              Product_level_dictionary
+#==================================================================
+
+def product_level_dictionary(image_filename, output_folder_path):
+    file_path = os.path.join(output_folder_path, image_filename)
+    public_id = upload_to_cloudinary(file_path)
     # Extract image information from filename
     file_info = extract_file_info(image_filename)
     aspect_ratio = file_info["aspect_ratio"]
@@ -78,14 +112,7 @@ def product_level_dictionary(image_filename):
         "Type": product_type,
         "Tags": "Miscellaneous",
         "Published": "TRUE",
-        "Option1 Name": "Size",
-        "Option1 Value":option1_values[0] if option1_values else "",
-        "Option2 Name": "",
-        "Option2 Value": "",
-        "Variant Price":option1_prices[0] if option1_prices else "",
-        "Option3 Name": "",
-        "Option3 Value": "",
-        "Image Src": "",
+        "Image Src": get_image_url_from_cloudinary(public_id),  # Use the Cloudinary URL
         "Image Alt Text": title,
         "Gift Card": "FALSE",
         "SEO Title": "",
@@ -103,9 +130,9 @@ def product_level_dictionary(image_filename):
          }
     return image_dict
 
-def test_product_level_dictionary():
-    file_name = "1.5--12345--canvas--abstract--1--Jane_Doe.jpg"
-    output = product_level_dictionary(file_name)
-    print(output)
+# def test_product_level_dictionary(output_folder_path):
+#     file_name = "1.5--12345--canvas--abstract--1--Jane_Doe.jpg"
+#     output = product_level_dictionary(file_name,output_folder_path=output_folder_path)
+#     print(output)
 
-test_product_level_dictionary()
+# test_product_level_dictionary()
