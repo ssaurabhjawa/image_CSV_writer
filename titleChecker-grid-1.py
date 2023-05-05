@@ -368,9 +368,41 @@ def get_image_url_from_cloudinary(public_id):
 from create_dict import create_img_dictionary
 from product_level_dict import product_level_dictionary
 from variant_level_dict import variant_level_dictionary
+from extract_file_info import extract_file_info
+
+from datetime import datetime
+import os
+import csv
+import pathlib
+from datetime import datetime
+import time
+
+
+def write_csv(images_list):
+    fieldnames = ["Handle", "Title", "Body (HTML)", "Vendor", "Product Category", "Type", "Tags", "Published", "Option1 Name", "Option1 Value", "Option2 Name", "Option2 Value", "Variant Price", "Option3 Name", "Option3 Value", "Image Src", "Image Alt Text", "Gift Card", "SEO Title", "SEO Description", "Variant Image", "Variant Weight Unit", "Variant Tax Code", "Cost per item", "Included / United Arab Emirates", "Included / International", "Price / International", "Compare At Price / International", "Status", "image_position"]
+    
+    # Create directory for CSV file
+    csv_dir = os.path.join(os.getcwd(), 'product_csv')
+    pathlib.Path(csv_dir).mkdir(parents=True, exist_ok=True)
+    
+    # Create filename with current timestamp
+    current_time = datetime.now().strftime("%H:%M:%S")
+    csv_filename = f"products_{current_time}.csv"
+    csv_path = os.path.join(output_folder_path, f"products_{time.strftime('%H_%M_%S')}.csv")
+
+    
+    with open(csv_path, "w", newline="", encoding='utf-8') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        
+        for image_dict in images_list:
+            writer.writerow(image_dict)
+            
+    messagebox.showinfo("CSV Generated", "CSV file generated successfully!")
+
 
 def process_image():
-    global image_list
+    image_list = []
     image_dict = []
     for filename in os.listdir(output_folder_path):
         if filename.endswith(('.jpg', '.jpeg', '.png')):
@@ -380,28 +412,29 @@ def process_image():
             position = int(file_parts[4])
             if position == 1 :
                 print(f"file name::{filename}")
-                image_dict = product_level_dictionary(filename)           
-            elif position > 1:
-                image_dict = variant_level_dictionary(filename, position)
-    print(image_dict)
-    return image_dict
+                image_dict = product_level_dictionary(filename)  
+                image_list.append(image_dict)         
+            elif position == 2 :
+                file_info = extract_file_info(filename)
+                option1_values = file_info["option1_values"]
+                option1_prices = file_info["option1_prices"]
+                print(option1_values)
+                print(option1_prices)
+                for i, option in enumerate(option1_values, start=1):
+                    image_dict = variant_level_dictionary(filename, option1_values[i-1], option1_prices[i-1])
+                    image_list.append(image_dict)
+
+    return image_list
+
+# Call process_image function when the "Process Images" button is clicked
+def process_images():
+    global images_list
+    images_list = process_image()
+    write_csv(images_list)
 
 
-
-
-
-process_images = tk.Button(root, text="1", width = 10, height=10,command=process_image)
-process_images.grid(row=6, column=6,padx=5, pady=5)
-
-
-
-
-
-
-
-
-
-
+process_button = tk.Button(root, text="Process Images", command=process_images)
+process_button.grid(row=6, column=6, padx=10, pady=10)
 
 
 

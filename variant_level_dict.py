@@ -12,7 +12,7 @@ from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
 
 
-def variant_level_dictionary(image_filename,n):
+def variant_level_dictionary(image_filename,option, price):
     # Extract image information from filename
     file_info = extract_file_info(image_filename)
     aspect_ratio = file_info["aspect_ratio"]
@@ -21,8 +21,6 @@ def variant_level_dictionary(image_filename,n):
     title = file_info["title_var"]
     image_position = file_info["image_position_var"]
     artist= file_info["vendor"]
-    option1_values = file_info["option1_values"]
-    option1_prices = file_info["option1_prices"]
 
     # Create a dictionary for the image with all the CSV fields
     image_dict = {
@@ -35,12 +33,12 @@ def variant_level_dictionary(image_filename,n):
         "Tags": "Miscellaneous",
         "Published": "TRUE",
         "Option1 Name": "Size",
-        "Option1 Value":option1_values,
+        "Option1 Value":option,
         "Option2 Name": "",
         "Option2 Value": "",
         "Option3 Name": "",
         "Option3 Value": "",
-        "Variant Price":option1_prices[n] if option1_prices else "",
+        "Variant Price":price if price else "",
         "Image Src": "",
         "Image Alt Text": title,
         "Gift Card": "FALSE",
