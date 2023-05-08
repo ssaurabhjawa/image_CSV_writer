@@ -1,4 +1,5 @@
 import os
+from pricing_dict import productType_dict, artist_royalty_dict
 
 product_sizes = {
     "acrylic": {
@@ -63,12 +64,12 @@ product_sizes = {
     },
 }
 
-artist_prices = {
-    "Shutterstock": 257,
-    "Artist 1": 1.1,
-    "Artist 2": 1.1,
-    "Artist 3": 1.1
-}
+# artist_prices = {
+#     "ShutterStock": 257,
+#     "Artist 1": 1.1,
+#     "Artist 2": 1.1,
+#     "Artist 3": 1.1
+# }
 
 
 def extract_file_info(file_path):
@@ -107,8 +108,13 @@ def extract_file_info(file_path):
     # Extract option 1 values and prices if product type is supported
     if product_type.lower() in ["canvas", "poster", "acrylic", "wallpaper"]:
         option1_values, option1_prices = extract_option1Value_wallArt(file_info, product_type, orientation)
-        artist_price = artist_prices.get(artist_name, 1)
-        option1_prices = [round(p * artist_price, 2) for p in option1_prices]
+        artist_price = artist_royalty_dict.get(artist_name, 1)
+        print(artist_price)
+        if "shutterstock" in file_info["artist_name"].lower():
+            shutterstock_price = 257.0
+            option1_prices = [round(p + shutterstock_price, 2) for p in option1_prices]
+        else:
+            option1_prices = [round(p * artist_price, 2) for p in option1_prices]
         file_info["option1_values"] = option1_values
         file_info["option1_prices"] = option1_prices
     return file_info
@@ -137,7 +143,7 @@ def extract_option1Value_wallArt(file_info, product_type, orientation):
             size_parts = dimensions['size'].split('x')
             width_cm = float(size_parts[0])
             height_cm = float(size_parts[1])
-            aspect_ratio_tolerance = dimensions['ratio'] * 0.05
+            aspect_ratio_tolerance = dimensions['ratio'] * 0.02
             aspect_ratio_min = dimensions['ratio'] - aspect_ratio_tolerance
             aspect_ratio_max = dimensions['ratio'] + aspect_ratio_tolerance
             if abs(aspect_ratio - (width_cm / height_cm)) <= aspect_ratio_tolerance:

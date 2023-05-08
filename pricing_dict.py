@@ -6,7 +6,8 @@ productType_dict = {
 }
 
 artist_royalty_dict = {
-    "OBL_Print": 0.0,
-    "Artist 2": 0.1,
-    "Artist 3": 0.15
+    "ShutterStock": 257,
+    "OBL Display": 1.0,
+    "Artist 2": 1.1,
+    "Artist 3": 1.1
 }

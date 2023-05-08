@@ -1,6 +1,5 @@
 import os
 import uuid
-from dotenv import load_dotenv
 from extract_file_info import extract_file_info
 
 # Function to generate a Cloudinary public ID
